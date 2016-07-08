@@ -49,36 +49,6 @@ int_handler_prep:
 	addl $8, %esp
 	iret
 
-.type handler_prep, @function
-handler_prep:
-	pushl %gs
-	pushl %fs
-	pushl %es
-	pushl %ds
-	pusha
-	movl $0x10, %eax
-	movl %eax, %gs
-	movl %eax, %fs
-	movl %eax, %es
-	movl %eax, %ds
-
-	movl %esp, %eax
-	pushl %eax
-
-	call int_handler
-	
-	popl %eax
-
-	popa
-	popl %ds
-	popl %es
-	popl %fs
-	popl %gs
-	addl $8, %esp
-
-	iret
-	
-
 .macro isr num
 	.global isr\num
 	.type isr\num, @function

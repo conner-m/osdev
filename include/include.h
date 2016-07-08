@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdint.h>
 
 //io.c
 void outb(unsigned short addr, unsigned char msg);
@@ -19,3 +20,8 @@ unsigned char kbdus[128];
 void idt_init();
 void remap_pic();
 
+
+uint16_t pic_get_irr(void);
+uint16_t pic_get_isr(void);
+void IRQ_set_mask(unsigned char IRQline);
+void IRQ_clear_mask(unsigned char IRQline);

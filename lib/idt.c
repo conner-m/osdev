@@ -2,8 +2,8 @@
 #include "../include/include.h"
 #include "../include/interrupts.h"
 
-#define INTERRUPT 0xE /* Interrupts disabled in eflags. */
-#define TRAP 0xF      /* Interrupts unaffected in eflags. */
+#define INTERRUPT 0xE 
+#define TRAP 0xF      
 
 #define FLAG_PRESENT (1 << 7)
 #define DPL_SHIFT 5
@@ -11,19 +11,20 @@
 #define TYPE_SHIFT 0
 #define TYPE_BITS 4
 
-#define ICW1_ICW4	0x01		/* ICW4 (not) needed */
-#define ICW1_INIT	0x10		/* Initialization - required! */
- 
-#define ICW4_8086	0x01		/* 8086/88 (MCS-80/85) mode */
+#define ICW1_ICW4 0x01		
+#define ICW1_INIT 0x10		
 
-#define PIC1_COMMAND 0x20
+#define ICW4_8086 0x01		
+#define PIC1_CMD 0x20
 #define PIC1_DATA 0x21
-#define PIC2_COMMAND 0xA0
+#define PIC2_CMD 0xA0
 #define PIC2_DATA 0xA1
 
+#define PIC_READ_ISR 0xB
+#define PIC_READ_IRR 0xA
 
-void* memset(void* bufptr, int value, size_t size)
-{
+
+void* memset(void* bufptr, int value, size_t size){
 	unsigned char* buf = (unsigned char*) bufptr;
 	for ( size_t i = 0; i < size; i++ )
 		buf[i] = (unsigned char) value;
@@ -59,7 +60,7 @@ void idt_init(){
 	memset(&idt, 0, sizeof(idt));
 	make_idt_entry(&idt[0], isr0, INTERRUPT, 0x0);
 	make_idt_entry(&idt[1], isr1, INTERRUPT, 0x0);
-	make_idt_entry(&idt[2], isr2, INTERRUPT, 0x0);
+	//make_idt_entry(&idt[2], isr2, INTERRUPT, 0x0);
 	make_idt_entry(&idt[3], isr3, INTERRUPT, 0x0);
 	make_idt_entry(&idt[4], isr4, INTERRUPT, 0x0);
 	make_idt_entry(&idt[5], isr5, INTERRUPT, 0x0);
@@ -70,7 +71,7 @@ void idt_init(){
 	make_idt_entry(&idt[10], isr10, INTERRUPT, 0x0);
 	make_idt_entry(&idt[11], isr11, INTERRUPT, 0x0);
 	make_idt_entry(&idt[12], isr12, INTERRUPT, 0x0);
-	make_idt_entry(&idt[13], isr13, INTERRUPT, 0x0);
+	//make_idt_entry(&idt[13], isr13, INTERRUPT, 0x0);
 	make_idt_entry(&idt[14], isr14, INTERRUPT, 0x0);
 	make_idt_entry(&idt[15], isr15, INTERRUPT, 0x0);
 	make_idt_entry(&idt[16], isr16, INTERRUPT, 0x0);
@@ -113,20 +114,71 @@ void remap_pic()
 {
 	unsigned char a1, a2;
  
-	a1 = inb(PIC1_DATA);                        // save masks
+	a1 = inb(PIC1_DATA);                        
 	a2 = inb(PIC2_DATA);
  
-	outb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
-	outb(PIC2_COMMAND, ICW1_INIT+ICW1_ICW4);
-	outb(PIC1_DATA, 0x20);                 // ICW2: Master PIC vector offset
-	outb(PIC2_DATA, 0x28);                 // ICW2: Slave PIC vector offset
-	outb(PIC1_DATA, 4);                       // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
-	outb(PIC2_DATA, 2);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
+	outb(PIC1_CMD, ICW1_INIT+ICW1_ICW4);  
+	outb(PIC2_CMD, ICW1_INIT+ICW1_ICW4);
+	outb(PIC1_DATA, 0x20);                 
+	outb(PIC2_DATA, 0x28);                 
+	outb(PIC1_DATA, 4);                       
+	outb(PIC2_DATA, 2);                       
 
 	outb(PIC1_DATA, ICW4_8086);
 	outb(PIC2_DATA, ICW4_8086);
+
+	//outb(PIC1_CMD, 0xFF);
  
-	outb(PIC1_DATA, a1);   // restore saved masks.
-	outb(PIC2_DATA, a2);
+	//outb(PIC1_DATA, a1);   
+	//outb(PIC2_DATA, a2);
 }
 
+/* Helper func */
+static uint16_t __pic_get_irq_reg(int ocw3)
+{
+    /* OCW3 to PIC CMD to get the register values.  PIC2 is chained, and
+     * represents IRQs 8-15.  PIC1 is IRQs 0-7, with 2 being the chain */
+    outb(PIC1_CMD, ocw3);
+    outb(PIC2_CMD, ocw3);
+    return (inb(PIC2_CMD) << 8) | inb(PIC1_CMD);
+}
+ 
+/* Returns the combined value of the cascaded PICs irq request register */
+uint16_t pic_get_irr(void)
+{
+    return __pic_get_irq_reg(PIC_READ_IRR);
+}
+ 
+/* Returns the combined value of the cascaded PICs in-service register */
+uint16_t pic_get_isr(void)
+{
+    return __pic_get_irq_reg(PIC_READ_ISR);
+}
+
+void IRQ_set_mask(unsigned char IRQline) {
+    uint16_t port;
+    uint8_t value;
+ 
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) | (1 << IRQline);
+    outb(port, value);        
+}
+ 
+void IRQ_clear_mask(unsigned char IRQline) {
+    uint16_t port;
+    uint8_t value;
+ 
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) & ~(1 << IRQline);
+    outb(port, value);        
+}
