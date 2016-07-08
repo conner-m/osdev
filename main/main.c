@@ -13,19 +13,33 @@ void main(){
 	printk("Test",'s');
 	remap_pic();
 	idt_init();
+	
+	uint16_t irr = pic_get_irr(), isr = pic_get_isr();
+	//printk(p, 'h');
+	printk("  IRR=",'s');
+	printk(irr,'h');
+	printk("  ISR=",'s');
+	printk(isr, 'h');
+	while(1==1){
+		if(pic_get_isr() != isr){
+			isr = pic_get_isr();
+			printk("  New ISR=",'s');
+			printk(isr,'h');
+		}
+		if(pic_get_irr() != irr){
+			irr = pic_get_irr();
+			printk("  New IRR=",'s');
+			printk(irr,'h');	
+			asm("sti");
+		}
+
+	}
+	//asm volatile("cli");
+	//asm volatile("sti");
+	
 }
 
 
-struct regs{
-    unsigned int gs, fs, es, ds;
-    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    unsigned int int_no, err_code;
-    unsigned int eip, cs, eflags, useresp, ss;    
-};
-
-void int_handler(struct regs *st){
-	printk(st->int_no,'d');
-}
 
 
 
