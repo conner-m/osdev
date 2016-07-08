@@ -20,7 +20,8 @@ void main(){
 	printk(irr,'h');
 	printk("  ISR=",'s');
 	printk(isr, 'h');
-	while(1==1){
+	asm("sti");
+	/*while(1==1){
 		if(pic_get_isr() != isr){
 			isr = pic_get_isr();
 			printk("  New ISR=",'s');
@@ -30,10 +31,10 @@ void main(){
 			irr = pic_get_irr();
 			printk("  New IRR=",'s');
 			printk(irr,'h');	
-			asm("sti");
+			
 		}
 
-	}
+	}*/
 	//asm volatile("cli");
 	//asm volatile("sti");
 	
