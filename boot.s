@@ -26,7 +26,7 @@ stack_top:
 _start:
 	movl $stack_top, %esp
 	call main
-	#jmp .Lhang
+	jmp .Lhang
 	cli
 	hlt
 

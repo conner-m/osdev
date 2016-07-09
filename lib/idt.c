@@ -57,7 +57,7 @@ void make_idt_entry(struct idt_entry* idte,void(*handler)(void), uint8_t type, u
 }
 
 void idt_init(){
-	memset(&idt, 0, sizeof(idt));
+	memset(&idt, 0, sizeof(&idt));
 	make_idt_entry(&idt[0], isr0, INTERRUPT, 0x0);
 	make_idt_entry(&idt[1], isr1, INTERRUPT, 0x0);
 	//make_idt_entry(&idt[2], isr2, INTERRUPT, 0x0);
@@ -119,13 +119,14 @@ void remap_pic()
  
 	outb(PIC1_CMD, ICW1_INIT+ICW1_ICW4);  
 	outb(PIC2_CMD, ICW1_INIT+ICW1_ICW4);
-	outb(PIC1_DATA, 0x20);                 
+	outb(PIC1_DATA, 0x20);	//Offsets                 
 	outb(PIC2_DATA, 0x28);                 
-	outb(PIC1_DATA, 4);                       
+	outb(PIC1_DATA, 4);	//Connect PIC1&2 through pin 2                       
 	outb(PIC2_DATA, 2);                       
 
 	outb(PIC1_DATA, ICW4_8086);
 	outb(PIC2_DATA, ICW4_8086);
+	printk("PICs Set", 's');
 
 	//outb(PIC1_CMD, 0xFF);
  
