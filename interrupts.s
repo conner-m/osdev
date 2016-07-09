@@ -62,7 +62,7 @@ int_handler_prep:
 	.global irq\num
 	.type irq\num, @function
 	irq\num:
-		#pushl $0
+		pushl $0
 		pushl $(\num +32)
 		jmp int_handler_prep
 .endm

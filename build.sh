@@ -9,5 +9,6 @@
 ../i686/bin/i686-elf-gcc -c lib/idt.c -o idt.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 ../i686/bin/i686-elf-gcc -c lib/interrupts.c -o intc.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
+
 ../i686/bin/i686-elf-gcc -T linker.ld -o kernel.bin -ffreestanding -O2 -nostdlib boot.o int.o main.o io.o string.o vga.o idt.o intc.o -lgcc
 rm *.o
