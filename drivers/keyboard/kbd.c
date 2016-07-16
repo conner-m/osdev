@@ -1,4 +1,5 @@
 #include <display/textmode/textmode_display.h>
+#include <io.h>
 #include <stdint.h>
 
 const char kbdus[128]={
@@ -40,13 +41,18 @@ const char kbdus[128]={
     0,	/* All other keys are undefined */
 };
 
+void keyboard_init(){
+	outb(0x21,0xfd);
+   	outb(0xa1,0xff);
+
+}
 
 void keyboard_handler(){
 	uint8_t c = inb(0x60);
 	//printk(c,'d');
 	if(c & 0x80){
 	
-		int a = 1/0;
+		//int a = 1/0;
 	}
 	else{
 		putchar(kbdus[c]);

@@ -27,7 +27,7 @@ void pic_remap(){
 
 	outb(PIC1_DATA, ICW4_8086);
 	outb(PIC2_DATA, ICW4_8086);
-	printk("PICs Set", 's');
+	//printk("PICs Set", 's');
 	//outb(0x20, 0xF4);
 
 	//outb(PIC1_CMD, 0xFF);

@@ -1,7 +1,22 @@
+.global gdt_flush
+.type _gdt_flush, @function
+.extern gp
+gdt_flush:
+    lgdt gp
+    movl $0x10, %ax 
+    movl %ds, %ax
+    movl %es, %ax
+    movl %fs, %ax
+    movl %gs, %ax
+    movl %ss, %ax
+    jmp flush2
+flush2:
+    ret
 
 #make handler for spurious irqs 7 15
 .extern int_handler
 .type int_handler_prep, @function
+
 int_handler_prep:
 	pushl %eax
 	pushl %ecx
@@ -53,6 +68,7 @@ int_handler_prep:
 	.global isr\num
 	.type isr\num, @function
 	isr\num:
+		
 		pushl $0
 		pushl $\num
 		jmp int_handler_prep

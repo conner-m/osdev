@@ -3,7 +3,7 @@
 #include <keyboard/kbd.h>
 #include <stdint.h>
 #include <stddef.h>
-unsigned char exception_messages[]={
+/*unsigned char exception_messages[]={
     "Division By Zero",
     "Debug",
     "Non Maskable Interrupt",
@@ -39,7 +39,7 @@ unsigned char exception_messages[]={
     "Reserved",
     "Reserved",
     "Reserved1"
-};
+};*/
 struct regs{
     unsigned int gs, fs, es, ds;
     unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
@@ -84,6 +84,8 @@ void irq_handlers_init(){
 
 void int_handler(struct regs *st){
 
+	//printk("Handler Called",'s');
+
 	if (st->int_no >= 40){
         	outb(0xA0, 0x20);
 		
@@ -94,8 +96,8 @@ void int_handler(struct regs *st){
 		struct handler han = irq_handler_list[(st->int_no)-32];
 		han.func();
 	}
-	else{
-		printk(exception_messages[st->int_no],'s');}
+	//else{
+		//printk(exception_messages[st->int_no],'s');}
 
 	
 }

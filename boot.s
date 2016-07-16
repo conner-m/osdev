@@ -24,13 +24,16 @@ stack_top:
 .extern main
 
 _start:
+	#call _init
 	movl $stack_top, %esp
 	call main
+	#call _fini
 	jmp .Lhang
 	cli
 	hlt
 
 .Lhang:
+	#hlt
 	jmp .Lhang
 
 .size _start, . -_start

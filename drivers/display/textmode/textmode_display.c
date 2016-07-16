@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <io.h>
 
 uint16_t* SCRN_BUFFER = (uint16_t*)0xB8000;
 const int HEIGHT = 30, WIDTH = 80;
@@ -62,5 +63,4 @@ void putchar(const char* ch){
 			xpos++;
 	}
 	
-
 }

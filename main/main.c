@@ -1,5 +1,11 @@
-#include "../include/include.h"
+#include <x86/pic.h>
+#include <x86/idt.h>
+#include <x86/gdt.h>
+#include <io.h>
+#include <display/textmode/textmode_display.h>
+#include <keyboard/kbd.h>
 #include <stdbool.h>
+
 
 extern char KernelEnd[];
 
@@ -9,19 +15,21 @@ extern char KernelEnd[];
 };*/
 
 void main(){
-	cls();
-	//printk("Test",'s');
-	remap_pic();
+	pic_remap();
+	irq_handlers_init();
 	idt_init();
-	cls();
-	outb(0x21,0xfd);
-   	outb(0xa1,0xff);
-	asm("sti");
-	//PS2_Initialize();
+	keyboard_init();
+	gdt_install();
 	
-	//outb();
-	//asm volatile("int $0x07");
+	cls();
+	printk("> ",'s');
+
+	asm("sti");
+	
+
 }
+
+
 
 
 
